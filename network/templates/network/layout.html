@@ -1,0 +1,146 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Social Network{% endblock %}</title>
+        <link href="{% static 'network/styles.css' %}" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="{% static 'favicon_network.png' %}">
+        <script src="{% static 'network/index.js' %}"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+
+        <nav id="navbar">
+
+            <a class="navbar-link" id="navbar-network" href="{% url 'index' %}">Network</a>
+
+            <a class="navbar-link" href="{% url 'index' %}">All posts</a>
+            
+            {% if user.is_authenticated %}
+                <a class="navbar-link" href="{% url 'friends_posts' %}">Posts from friends</a>
+                <a class="navbar-link" href="{% url 'liked_posts' %}">Liked posts</a>
+            {% else %}
+                <a disabled class="navbar-disabledLink" title="Log in to see Friends posts">Posts from friends</a>
+                <a disabled class="navbar-disabledLink" title="Log in to see Liked posts">Liked posts</a>
+            {% endif %}
+
+        </nav>
+
+        <div id="sidebar_blockBody">
+
+            <nav id="sidebar">
+                {% if user.is_authenticated %}
+                    <a id="sidebar-username" class="sidebar-link" href="{% url 'profile' request.user.username %}">{{ request.user.username }}</a>
+                    <a class="sidebar-link" href="{% url 'profile' request.user.username %}">My profile</a>
+                    <a class="sidebar-link" href="{% url 'followers' %}">Followers</a>
+                    <a class="sidebar-link" href="{% url 'following' %}">Following</a>
+                    <hr>
+                    <a id="sidebar-logout" class="sidebar-log" href="{% url 'logout' %}">Log out</a>
+                {% else %}
+                    <a disabled id="sidebar-notSignedIn" class="sidebar-link">Not signed in</a>
+                    <hr>
+                    <a id="sidebar-login" class="sidebar-log" href="{% url 'login' %}">Log in</a>
+                    <a id="sidebar-register" class="sidebar-log" href="{% url 'register' %}">Register</a>
+                {% endif %}
+            </nav>
+
+            <div id="blockBody">
+                {% block header %}
+                {% endblock %}
+
+                {% block body %}
+
+                    {% for post in posts %}        
+                        <div id="post_{{post.id}}_div" class="post">
+
+                            <div class="post-username_timestamp">
+                                <a href="{% url 'profile' post.user.username %}">{{post.user.username}}</a>
+                                <div class="post-timestamp">
+                                    {{post.timestamp|date:"j/M/Y"}}, at {{post.timestamp|date:"G:i:s"}}
+                                </div>
+                            </div>
+
+                            <div class="post-text" id="post_{{post.id}}_text">
+                                {{post.text}}
+                            </div>
+
+                            <div class="post-errorMessage" id="post_{{post.id}}_errorMessage"></div>
+
+                            <div class="post-edited" id="post_{{post.id}}_edited">
+                                {% if post.edited == True %}
+                                    Edited
+                                {% endif %}
+                            </div>
+
+                            <div class="post-likes">
+                                {% if request.user.is_authenticated %}
+                                    {% if request.user not in post.likes.all %}
+                                        <div class="post-likeContainer">
+                                            <div class="post-likeAnimation" id="likeAnimation_{{post.id}}_button" style="display:none;" onclick="dislike('{{post.id}}')"></div>
+                                            <div class="post-likeButton" id="like_{{post.id}}_button" style="display:block;" onclick="like('{{post.id}}')"></div>
+                                            <div class="post-dislikeButton" id="dislike_{{post.id}}_button" style="display:none;" onclick="dislike('{{post.id}}')"></div>
+                                        </div>
+                                    {% else %}
+                                        <div class="post-likeContainer">
+                                            <div class="post-likeAnimation" id="likeAnimation_{{post.id}}_button" style="display:none;" onclick="dislike('{{post.id}}')"></div>
+                                            <div class="post-likeButton" id="like_{{post.id}}_button" style="display:none;" onclick="like('{{post.id}}')"></div>
+                                            <div class="post-dislikeButton" id="dislike_{{post.id}}_button" style="display:block;" onclick="dislike('{{post.id}}')"></div>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="post-likeContainer">
+                                        <div class="post-likeButton" id="like_{{post.id}}_button" style="display:block;"></div>
+                                    </div>
+                                {% endif %}
+                                <div id="post_{{post.id}}_likes">
+                                    {{post.likes.count}}
+                                </div>
+                            </div>
+
+                            {% if request.user.username == post.user.username %}
+                                <input class="post-editButton" id="editPost_{{post.id}}_button" type="button" onclick="edit_post('{{post.id}}')">
+                                <input class="post-deleteButton" id="deletePost_{{post.id}}_button" type="button" onclick="delete_post('{{post.id}}')">
+                            {% endif %}
+
+                            <div class="post-deleteWarning-div" id="deletePost_{{post.id}}_div" style="display: none;">
+                                <div class="post-deleteWarning-message">Are you sure that you want to delete this post?</div>
+                                <input class="post-deleteWarning-yesButton" id="deleteWarning_{{post.id}}_yesButton" type="button" value="Delete">
+                                <input class="post-deleteWarning-noButton" id="deleteWarning_{{post.id}}_noButton" type="button" value="Go back">
+                            </div>
+
+                        </div>        
+                    {% empty %}
+                        No posts
+                    {% endfor %}
+                
+                {% endblock %}
+
+                {% block pagination %}
+
+                    <nav id="pagination">
+                        {% if posts.has_previous %}
+                            <a id="pagination-first" class="pagination-link" href="?page=1">&laquo; First</a>
+                            <a id="pagination-previous" class="pagination-link" href="?page={{ posts.previous_page_number }}"> &laquo; Previous</a>
+                        {% else %}
+                                <a id="pagination-first" disabled class="pagination-disabledLink">First</a>
+                                <a id="pagination-previous" disabled class="pagination-disabledLink">Previous</a>
+                        {% endif %}
+        
+                        <a id="pagination-page" disabled class="pagination-disabledLink">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</a>
+        
+                        {% if posts.has_next %}
+                            <a id="pagination-next" class="pagination-link" href="?page={{ posts.next_page_number }}">Next &raquo;</a>
+                            <a id="pagination-last" class="pagination-link" href="?page={{ posts.paginator.num_pages }}">Last &raquo;</a>
+                        {% else %}
+                            <a id="pagination-next" class="pagination-disabledLink">Next</a>
+                            <a id="pagination-last" class="pagination-disabledLink">Last</a>
+                        {% endif %}
+                    </nav>
+            
+                {% endblock %}
+        
+            </div>
+        </div>
+    </body>
+</html>

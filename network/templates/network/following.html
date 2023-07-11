@@ -1,0 +1,20 @@
+{% extends "network/layout.html" %}
+
+{% block header %}
+
+    <div id="pageTitle">
+        People you follow
+    </div>
+
+{% endblock %}
+
+{% block body %}
+    {% for user in users %}
+    <li>
+        <a href="/profile/{{ user.username }}">{{ user.username }}</a>
+    </li>
+    {% endfor %}
+{% endblock %}
+
+{% block pagination %}
+{% endblock %}

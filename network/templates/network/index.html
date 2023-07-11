@@ -1,0 +1,22 @@
+{% extends "network/layout.html" %}
+
+{% block header %}
+
+    <div id="pageTitle">
+        All posts
+    </div>
+    
+    {% if request.user.is_authenticated %}
+        <form id="newPost-form" method="post" action="{% url 'new_post' %}">
+            <div id="newPost-title">
+                Share a piece of your private life <i>(preferably money related so I can make a profit)</i>
+            </div>
+            {% csrf_token %}
+            {{ newPost_form }}
+            <div>
+                <input id="newPost-button" type="submit" value="Post">
+            </div>
+        </form>
+    {% endif %}
+
+{% endblock %}

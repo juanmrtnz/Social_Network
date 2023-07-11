@@ -1,0 +1,48 @@
+{% extends "network/layout.html" %}
+
+{% block header %}
+
+    <div id="profile-header">
+
+        <div id="profile-username_followButton">
+            <div id="profile-username">
+                {{ profile.username }}
+            </div>
+            <div>
+                {% if request.user.is_authenticated %}
+                    {% if profile.username != request.user.username %}
+                        {% if profile not in user.following.all %}
+                            <input id="profile-followButton" type="submit" value="Follow" style="display:block;" onclick="follow('{{profile.username}}')">
+                            <input id="profile-unfollowButton" type="submit" value="Unfollow" style="display:none;" onclick="unfollow('{{profile.username}}')">
+                        {% else %}
+                            <input id="profile-followButton" type="submit" value="Follow" style="display:none;" onclick="follow('{{profile.username}}')">
+                            <input id="profile-unfollowButton" type="submit" value="Unfollow" style="display:block;" onclick="unfollow('{{profile.username}}')">
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="profile-posts_followers_following">
+            <div id="profile-posts">
+                <div id="profile-postsCount">{{ posts_count }}</div>
+                <div>posts</div>
+            </div>    
+            <div id="profile-followers">
+                <div id="profile-followersCount">{{ profile.followers.count }}</div>
+                <div>followers</div>
+            </div>
+            <div id="profile-following">
+                <div id="profile-followingCount">{{ profile.following.count }}</div>
+                <div>following</div>
+            </div>
+        </div>
+
+        <hr>
+
+        <div id="profile-postsHeader">
+            Posts
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "network/layout.html" %}
+
+{% block header %}
+    <div id="pageTitle">
+        Log in
+    </div>
+{% endblock %}
+
+{% block body %}
+
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <div >
+            <input autofocus required class="logForm-textbox" type="text" name="username" placeholder="Username">
+        </div>
+        <div >
+            <input required class="logForm-textbox" type="password" name="password" placeholder="Password">
+        </div>
+        {% if message %}
+            <div id="log-errorMessage">
+                {{ message }}
+            </div>
+        {% endif %}
+        <div>
+            <input id="logForm-button" type="submit" value="Login">
+        </div>
+    </form>
+
+    Don't have an account? <a href="{% url 'register' %}">Register here</a>.
+
+{% endblock %}
+
+{% block pagination %}
+{% endblock %}
